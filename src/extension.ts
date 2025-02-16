@@ -1,26 +1,56 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vs from 'vscode';
+// '@types/eyo-kernel@*' is not in this registry.
+const Eyo = require('eyo-kernel');
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+/**
+ * This method is called when your extension is activated
+ * Your extension is activated the very first time the command is executed
+ * @param context 
+ */
+export function activate(context: vs.ExtensionContext) {
+	console.log('activate');
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "txt-format" is now active!');
+	const safeEyo = new Eyo();
+	safeEyo.dictionary.loadSafeSync();
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
+	function wikify() {
+		console.log('wikify');
+
+		const editor: vs.TextEditor | undefined = vs.window.activeTextEditor;
+		if (!editor) {
+			vs.window.showInformationMessage('Нет открытого файла!');
+			return;
+		}
+
+		let text: string = editor.document.getText();
+		
+		const pos0 = new vs.Position(0, 0);
+		const pos1: vs.Position = editor.document.positionAt(text.length);
+		const range = new vs.Range(pos0, pos1);
+
+		text = safeEyo.restore(text);
+
+		// python3 autoformat.py --pre |
+		// js wikificator.js |
+		// js node_modules/eyo/bin/cli.js --stdin |
+		// python3 autoformat.py --post
+
+		// console.log(text);
+		editor.edit((editBuilder: vs.TextEditorEdit) => {
+			editBuilder.replace(range, text);
+		});
+	}
+
 	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('txt-format.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from txt-format!');
-	});
+	const COMMAND_ID = 'txt-format.txt';
 
+	const disposable = vs.commands.registerCommand(COMMAND_ID, wikify);
 	context.subscriptions.push(disposable);
 }
 
-// This method is called when your extension is deactivated
-export function deactivate() {}
+/**
+ * This method is called when your extension is deactivated
+ */
+export function deactivate() {
+	console.log('deactivate');
+}
