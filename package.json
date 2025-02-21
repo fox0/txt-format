@@ -3,6 +3,7 @@
   "displayName": "txt-format",
   "description": "",
   "version": "0.0.1",
+  "repository": "https://github.com/fox0/txt-format",
   "engines": {
     "vscode": "^1.97.0"
   },
@@ -27,18 +28,13 @@
     "lint": "eslint src",
     "test": "vscode-test"
   },
-  "devDependencies": {
-    "@types/mocha": "^10.0.10",
-    "@types/node": "20.x",
-    "@types/vscode": "^1.97.0",
-    "@typescript-eslint/eslint-plugin": "^8.22.0",
-    "@typescript-eslint/parser": "^8.22.0",
-    "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.4.1",
-    "eslint": "^9.19.0",
-    "typescript": "^5.7.3"
-  },
   "dependencies": {
     "eyo-kernel": "^2.5.6"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.97.0",
+    "@vscode/vsce": "^3.2.2"
   }
 }
