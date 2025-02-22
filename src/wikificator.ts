@@ -1,18 +1,23 @@
-var txt = '';
-var hidden = [];
+var txt: string = '';
+var hidden: string[] = [];
 
-// FUNCTIONS
-function r(r1, r2) {
+// function r(r1: string | RegExp, r2?: string): void;
+// function r(r1: string | RegExp, r2?: ((substring: string, ...args: any[]) => string)): void;
+function r(r1: string | RegExp, r2?: any) {
+	if (r2 === undefined) return;
 	txt = txt.replace(r1, r2);
 }
-function hide(re) {
-	r(re, function (s) {
+
+function hide(re: RegExp) {
+	r(re, function (s: string) {
 		return '\x01' + hidden.push(s) + '\x02';
 	});
 }
-function hideTag(tag) {
+
+function hideTag(tag: string) {
 	hide(new RegExp('<' + tag + '( [^>]+)?>[\\s\\S]+?<\\/' + tag + '>', 'gi'));
 }
+
 function hideTemplates() {
 	var pos = 0, stack = [], tpl, left, right;
 	while (true) {
@@ -48,7 +53,8 @@ function hideTemplates() {
 		}
 	}
 }
-function processLink(link, left, right) {
+
+function processLink(link: string, left: string, right: string): string {
 	left = /*$.trim(*/ left.replace(/[ _\u00A0]+/g, ' ') /*)*/;
 	if (left.match(/^(?:Категория|Файл) ?:/)) {
 		return '[[' + left + '|' + right + ']]';
@@ -65,8 +71,9 @@ function processLink(link, left, right) {
 		return '[[' + left + '|' + right + ']]';
 	}
 }
-export function processText(text) {
-	console.log('processText');
+
+export function processText(text: string): string {
+	// console.log('processText');
 
 	txt = text;
 
@@ -89,7 +96,7 @@ export function processText(text) {
 	r(/(\{\{\s*)(?:reflist|список примечаний)(\s*[\|\}])/ig, '$1примечания$2');
 	r(/[\u00A0 ]+(\{\{\s*([Rr]ef-[a-z\-]+?|[Ee]n icon|[Cc]hecked|[Vv]|[Пп]роверено)\}\})/g, '$1');
 	r(/<[\/\\]?(hr|br)( [^\/\\>]+?)? ?[\/\\]?>/gi, '<$1$2>');
-	r(/(\| *Координаты (?:истока|устья) *= *)(\d+(?:\.\d+)?)[,/] ?(\d+(?:\.\d+)?(?=\s))/g, function (s, m1, m2, m3) {
+	r(/(\| *Координаты (?:истока|устья) *= *)(\d+(?:\.\d+)?)[,/] ?(\d+(?:\.\d+)?(?=\s))/g, function (s: string, m1: any, m2: any, m3: any) {
 		return m1 + (+parseFloat(m2).toFixed(4)) + '/' + (+parseFloat(m3).toFixed(4));
 	});
 	hideTemplates();
@@ -230,12 +237,3 @@ export function processText(text) {
 	txt = txt.substr(1, txt.length - 2);
 	return txt;
 }
-// // Check regexp support
-// try {
-//     txt = 'ая'.replace(/а/g, 'б').replace(/б(?=я)/, 'в');
-// }
-// catch (e) { }
-// if (txt !== 'вя') {
-//     alert(wmCantWork);
-//     return;
-// }

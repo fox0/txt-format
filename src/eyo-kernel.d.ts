@@ -1,7 +1,7 @@
 // @types/eyo-kernel@2.5.6
 
 declare module 'eyo-kernel' {
-    export class Dictionary {
+    class Dictionary {
         /**
          * Загружает словарь.
          */
@@ -63,7 +63,7 @@ declare module 'eyo-kernel' {
         get(): object;
     }
 
-    export class Eyo {
+    class Eyo {
         readonly dictionary: Dictionary;
 
         /**
@@ -78,4 +78,6 @@ declare module 'eyo-kernel' {
          */
         restore(text: string): string;
     }
+
+    export = Eyo;
 }
