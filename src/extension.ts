@@ -1,6 +1,11 @@
 import * as vs from 'vscode';
 import { processText } from './text';
 
+function countWords(str: string): number {
+	var matches = str.match(/[\w\d'-]+/gi);
+	return matches ? matches.length : 0;
+}
+
 function wikify() {
 	console.log('wikify');
 
@@ -14,6 +19,9 @@ function wikify() {
 	let text_length: number = text.length;
 
 	text = processText(text);
+	text = text + '\n\n--\n'
+		+ 'число слов: ' + String(countWords(text)) + '\n'
+		+ 'число знаков: ' + String(text.length) + '\n';
 
 	editor.edit((editBuilder: vs.TextEditorEdit) => {
 		const pos0: vs.Position = new vs.Position(0, 0);
