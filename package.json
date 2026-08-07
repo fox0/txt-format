@@ -2,7 +2,8 @@
   "name": "txt-format",
   "displayName": "txt-format",
   "description": "Типографика и ёфикатор",
-  "version": "0.0.4",
+  "publisher": "fox0",
+  "version": "0.0.6",
   "repository": "https://github.com/fox0/txt-format",
   "engines": {
     "vscode": "^1.125.0"
@@ -11,7 +12,7 @@
     "Other"
   ],
   "activationEvents": [],
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {

@@ -1,8 +1,7 @@
-.vscode/**
-src/**
-out/tests/**
+.vscode/
+src/
+node_modules/eyo-kernel/dictionary/
+node_modules/eyo-kernel/dist/bundle/
+node_modules/eyo-kernel/dist/bundle.*
 .gitignore
-jest.config.js
-**/tsconfig.json
-**/*.map
 **/*.ts
