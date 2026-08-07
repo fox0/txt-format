@@ -1,10 +1,5 @@
 import * as vs from 'vscode';
-import { processText } from './text';
-
-function countWords(str: string): number {
-	var matches = str.match(/[\w\d'-]+/gi);
-	return matches ? matches.length : 0;
-}
+import { processText, countWords } from './text';
 
 function wikify() {
 	console.log('wikify');
@@ -37,6 +32,10 @@ function wikify() {
  */
 export function activate(context: vs.ExtensionContext) {
 	console.log('activate');
+
+	const COPY_WITH_SYNTAX_HIGHLIGHTING = 'editor.copyWithSyntaxHighlighting';
+
+	vs.workspace.getConfiguration().update(COPY_WITH_SYNTAX_HIGHLIGHTING, false, vs.ConfigurationTarget.Global);
 
 	// The commandId parameter must match the command field in package.json
 	const COMMAND_ID = 'txt-format.wikify';

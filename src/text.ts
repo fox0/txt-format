@@ -1,9 +1,14 @@
 import * as wiki from './wikificator';
-import Eyo from 'eyo-kernel';
+import { Eyo, safeDictionary } from 'eyo-kernel';
 
 const safeEyo = new Eyo();
-safeEyo.dictionary.loadSafeSync();
+safeEyo.dictionary.set(safeDictionary);
 
+/**
+ * Типографиктор и ёфикатор
+ * @param text 
+ * @returns 
+ */
 export function processText(text: string): string {
     // console.log('processText');
 
@@ -19,6 +24,16 @@ export function processText(text: string): string {
     return text;
 }
 
+/**
+ * Считает количество слов или что-то похожее на слова
+ * @param str 
+ * @returns 
+ */
+export function countWords(str: string): number {
+    var matches = str.match(/[a-zа-яё'-]+/gi);
+    return matches ? matches.length : 0;
+}
+
 function processTextPre(text: string): string {
     // console.log('processTextPre');
 
@@ -26,11 +41,11 @@ function processTextPre(text: string): string {
         text = text.replace(r1, r2);
     }
 
-    // r(/(ко[ей])\s([кч]то)/gi, '$1-$2');
+    r(/\b(ко[ей])\s([кч]то)/gi, '$1-$2');
 
-	// r(/(\| *Координаты (?:истока|устья) *= *)(\d+(?:\.\d+)?)[,/] ?(\d+(?:\.\d+)?(?=\s))/g, function (s: string, m1: any, m2: any, m3: any) {
-	// 	return m1 + (+parseFloat(m2).toFixed(4)) + '/' + (+parseFloat(m3).toFixed(4));
-	// });
+    // r(/(\| *Координаты (?:истока|устья) *= *)(\d+(?:\.\d+)?)[,/] ?(\d+(?:\.\d+)?(?=\s))/g, function (s: string, m1: any, m2: any, m3: any) {
+    // 	return m1 + (+parseFloat(m2).toFixed(4)) + '/' + (+parseFloat(m3).toFixed(4));
+    // });
 
     // TODO
     return text;
