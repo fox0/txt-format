@@ -1,0 +1,446 @@
+From f47e496f7822e8b97e99ecf6270945a7c0e3c113 Mon Sep 17 00:00:00 2001
+From: fox0 <15684995+fox0@users.noreply.github.com>
+Date: Fri, 7 Aug 2026 21:45:26 +0700
+Subject: [PATCH] wikificator
+
+https://ru.wikipedia.org/wiki/MediaWiki:Gadget-wikificator.js
+
+---
+ src/wikificator.ts | 357 +--------------------------------------------
+ 1 file changed, 6 insertions(+), 351 deletions(-)
+
+diff --git a/src/wikificator.ts b/src/wikificator.ts
+index d4d9880..e0e831d 100644
+--- a/src/wikificator.ts
++++ b/src/wikificator.ts
+@@ -5,135 +5,19 @@
+ 	или через [[WP:AWB]] — хотя синтаксис регулярок в АВБ отличается от ВФ.
+ */
+ 
+-// <nowiki>
+-mw.loader.using( 'jquery.client', function () {
+-
+-var clientProfile = $.client.profile();
+-// Сочетания клавиш во всплывающей подсказке (tooltip): Ctrl+Alt+W на Windows, Ctrl+Shift+W на Mac'е
+-var hotkey = clientProfile.platform === 'mac' ? 'Ctrl+Shift+W' : 'Ctrl+Alt+W';
+-var strings = {
+-	name: 'Викификатор',
+-	tooltip: 'Викификатор — автоматический обработчик текста (' + hotkey + ')',
+-	summary: 'Викификатор',
+-	fullText: 'Викификатор обработает ВЕСЬ текст на этой странице. Продолжить?',
+-	talkPage: 'Викификатор не обрабатывает страницы обсуждения целиком.\n\nВыделите ваше сообщение — обработано будет только оно.'
+-};
+-window.wfPlugins = window.wfPlugins || [];
+-window.wfPluginsT = window.wfPluginsT || [];
+-
+-// Function takes an input or text as an argument. If it is absent, it uses $( '#wpTextbox1' )
+-// as an input.
+-window.Wikify = function ( inputOrText ) {
++export function Wikify(text: string): string {
+ 	'use strict';
+ 
++	var txt = text;
++
+ 	// ФУНКЦИИ
+ 
+-	function r( r1, r2 ) {
++	function r(r1: string | RegExp, r2?: any) {
+ 		txt = txt.replace( r1, r2 );
+ 	}
+ 
+-	function hide( re ) {
+-		r( re, function ( s ) {
+-			return '\x01' + hidden.push( s ) + '\x02';
+-		} );
+-	}
+-
+-	function hideTag ( tag ) {
+-		hide( new RegExp( '<' + tag + '( [^>]+)?>[\\s\\S]+?<\\/' + tag + '>', 'gi' ) );
+-	}
+-
+-	function hideTemplates() {
+-		hide( /\{\{([^{]\{?)+?\}\}/g );
+-		var pos = 0,
+-			stack = [],
+-			tpl,
+-			left,
+-			right;
+-		while ( true ) {
+-			left = txt.indexOf( '{{', pos );
+-			right = txt.indexOf( '}}', pos );
+-			if ( left === -1 && right === -1 && !stack.length ) {
+-				break;
+-			}
+-			if ( left !== -1 && ( left < right || right === -1 ) ) {
+-				stack.push( left );
+-				pos = left + 2;
+-			} else {
+-				left = stack.pop();
+-				if ( typeof left === 'undefined' ) {
+-					if ( right === -1 ) {
+-						pos += 2;
+-						continue;
+-					} else {
+-						left = 0;
+-					}
+-				}
+-				if ( right === -1 ) {
+-					right = txt.length;
+-				}
+-				right += 2;
+-				tpl = txt.substring( left, right );
+-				txt = txt.substring( 0, left ) +
+-					'\x01' + hidden.push( tpl ) + '\x02' +
+-					txt.substr( right );
+-				pos = right - tpl.length;
+-			}
+-		}
+-	}
+-	
+-	function processLink( link, left, right ) {
+-		left = left.replace( /[ _\u00A0]+/g, ' ' ).trim();
+-		if ( left.match( /^(?:Категория|Файл) ?:/ ) ) {
+-			return '[[' + left + '|' + right + ']]';
+-		}
+-		right = right.replace( / {2,}/g, ' ' ).trim();
+-		var inLink = right.substr( 0, left.length );
+-		var afterLink = right.substr( left.length );
+-		var uniLeft = left.substr( 0, 1 ).toUpperCase() + left.substr( 1 );
+-		var uniRight = ( right.substr( 0, 1 ).toUpperCase() + right.substr( 1 ) )
+-			.replace( /[_\u00A0]/g, ' ' );
+-		if ( uniRight.indexOf( uniLeft ) === 0 && afterLink.match( /^[a-zа-яё]*$/ ) ) {
+-			return '[[' + inLink + ']]' + afterLink;
+-		} else {
+-			return '[[' + left + '|' + right + ']]';
+-		}
+-	}
+-
+ 	function processText() {
+ 		var u = '\u00A0'; // неразрывный пробел
+-		if (
+-			// это страница обсуждения, т. е. чётное пространство
+-			mw.config.get( 'wgNamespaceNumber' ) % 2 ||
+-			mw.config.get( 'wgNamespaceNumber' ) === 4
+-		) {
+-			var sigs = txt.match( /\d\d:\d\d, \d\d? \S{3,8} 20\d\d \(UTC\)/g );
+-			if ( sigs && sigs.length > 1 ) {
+-				alert( strings.talkPage );
+-				return;
+-			}
+-		}
+-
+-		hideTag( 'nowiki' );
+-		hideTag( 'pre' );
+-		hideTag( 'source' );
+-		hideTag( 'syntaxhighlight' );
+-		hideTag( 'templatedata' );
+-
+-		hideTag( 'code' );
+-		hideTag( 'kbd' );
+-		hideTag( 'tt' );
+-
+-		hideTag( 'graph' );
+-		hideTag( 'hiero' );
+-		hideTag( 'math' );
+-		hideTag( 'timeline' );
+-		hideTag( 'chem' );
+-		hideTag( 'score' );
+-		hideTag( 'categorytree' );
+-		hideTag( 'imagemap' );
+-		hideTag( 'inputbox' );
+-		hideTag( 'mapframe' );
+-		hideTag( 'maplink' );
+ 		
+ 		r( /\{\{\s*ref-(\w+)\s*/g, '{{ref|$1' ); // {{ref-en}} → {{ref|en}} и т. д.
+ 		// Упрощение кода степеней: {{^5}}{{^0}}{{^3}} → {{sup|503}}. Вплоть до 9 таких цифр подряд. Больше правил о степенях будет ниже, см. "Степени".
+@@ -149,17 +33,6 @@ window.Wikify = function ( inputOrText ) {
+ 		r( /(\{\{\s*)примечания\s*\|\s*height=[0-9]*(\s*[\|\}])/ig, '$1примечания$2' );
+ 		r( /[\u00A0 ]+(\{\{\s*([Rr]ef-[a-z\-]+?|[Ee]n icon|[Cc]hecked|[Vv]|[Пп]роверено)\}\})/g, '$1' );
+ 		r( /<[\/\\]?(hr|br)( [^\/\\>]+?)?? *[\/\\]?>/gi, '<$1$2>' );
+-		r(
+-			/(\| *Координаты[ _А-ЯЁа-яё]*= *)(\d+(?:[.,]\d+)?)[,/] ?(\d+(?:[.,]\d+)?(?=\s))/g,
+-			function ( s, m1, m2, m3 ) {
+-				return (
+-					m1 +
+-					( +parseFloat( m2.replace( ',', '.' ) ).toFixed( 4 )) +
+-					'/' +
+-					( +parseFloat( m3.replace( ',', '.' ) ).toFixed( 4 ) )
+-				);
+-			}
+-		);
+ 		r( /<noinclude>\s*(\{\{[dD]ocpage\}\})\s*<\/noinclude>/g, '$1' );
+ 		r( /(\| *(?:[сСcCsS]|pp?|страницы\d?|pages\d?|seite\d?|alleseiten|листы\d?|том|volume|band|выпуск|issue|heft|номер|столбцы\d?|columns\d?|kolonnen\d?|серия год) *= *)(\d+)[\u00A0 ]?(?:-{1,3}|—) ?(\d+)/g, '$1$2—$3' );
+ 		r( /(\| *год *= *)(\d{4})[\u00A0 ]?(?:-{1,3}|—) ?(\d{4})/g, '$1$2—$3' );
+@@ -172,20 +45,6 @@ window.Wikify = function ( inputOrText ) {
+ 		}
+ 		
+ 		var i;
+-		for ( i in window.wfPluginsT ) {
+-			if ( window.wfPluginsT.hasOwnProperty( i ) ) {
+-				window.wfPluginsT[i]( txt, r );
+-			}
+-		}
+-
+-		// Скрытие шаблонов
+-		hideTemplates();
+-		hide( /^[ \t].*/mg );
+-		hide( /((?:https?|ftp|news|nntp|telnet|irc|gopher):\/\/|mailto:)[^\s\[\]<>"]+ ?/gi );
+-		hide( /^#(redirect|перенапр(авление)?)/i );
+-		hideTag( 'gallery' );
+-
+-
+ 		txt = '\n' + txt + '\n';
+ 
+ 
+@@ -216,10 +75,8 @@ window.Wikify = function ( inputOrText ) {
+ 		r( /\[\[ *([^|[\]]+?) *\| *„([^“|[\]]*)“ *\]\]/g, '„[[$1|$2]]“' );
+ 		r( /\[\[ *([^|[\]]+?) *\| *"([^"|[\]]*)" *\]\]/g, '"[[$1|$2]]"' );
+ 		r( /\[\[\s*([^\]\|]+?)\s*]]/g, '[[$1]]' );
+-		r( /\[\[([^|[\]\n]+)\|([^|[\]\n]+)\]\]/g, processLink ); // link shortening
+ 		r( /\[\[ *([^|[\]]+)([^|\[\]()]+?) *\| *\1 *\]\]\2/g, '[[$1$2]]' ); // text repetition after link
+ 		r( /\[\[ *(?!Файл:|Категория:)([a-zA-Zа-яёА-ЯЁ\u00A0-\u00FF %!\"$&'()*,\-—.\/0-9:;=?\\@\^_`’~]+) *\| *([^\|\[\]]+) *\]\]([a-zа-яё]+)/g, '[[$1|$2$3]]' ); // "
+-		hide( /\[\[[^\]|]+/g); // only link part
+ 
+ 
+ 		// ТЕГИ
+@@ -230,27 +87,9 @@ window.Wikify = function ( inputOrText ) {
+ 		r( /^<hr ?\/?>/gim, '----' );
+ 		r( /[\u00A0 \t]*<ref(?:\s+name="")?(\s|>)/gi, '<ref$1' );
+ 		r( /(\n== *[a-zа-я\s\.:]+ *==\n+)<references(?: +responsive *= *"")? *\/>/ig, '$1{' + '{примечания}}' );
+-		hide( /<[a-z][^>]*?>/gi);
+-
+-		hide( /^(\{\||\|\-).*/mg); // table/row def
+-		hide( /(^\||^!|!!|\|\|) *[a-z]+=[^|]+\|(?!\|)/mgi); // cell style
+-		hide( /\| +/g); // formatted cell
+ 
+ 		r( /[ \t\u00A0]{2,}/g, ' ' ); // двойные пробелы
+ 
+-		// HTML-сущности и т. п. → символы Юникода. Отключено в шаблонах — 10-м пространстве:
+-		if ( mw.config.get( 'wgNamespaceNumber' ) !== 10 ) {
+-			r( /&(#x[0-9a-f]{2,4}|#[0-9]{3,4}|[0-9a-z]{2,8});/gi, function ( s ) {
+-				var t = document.createElement( 'textarea' );
+-				t.innerHTML = s;
+-				var c = t.value;
+-				// Не исправляются html-сущности ниже 128. Исключение — пробел
+-				if ( c.length === 1 && c.charCodeAt( 0 ) > 127 || s === '&#x20;' ) {
+-					return c;
+-				}
+-				return s;
+-			});
+-		}
+ 		r( /\(tm\)/gi, '™' );
+ 		r( /\.\.\./g, '…' ); // три точки → многоточие (согл. [[ВП:ТГ]])
+ 		r( /(^|[^+])\+-(?!\+|-)/g, '$1±' );
+@@ -294,26 +133,6 @@ window.Wikify = function ( inputOrText ) {
+ 		r( /(\d)--(\d)/g, '$1—$2' ); // -> &mdash;
+ 		r( /(\s)-(\d)/g, '$1−$2' ); // hyphen -> minus
+ 
+-		r(
+-			/(Boeing|Боинг(?:[ауеио][мвх]?и?))?(\(|\s)([12]?\d{3})[\u00A0 ]?(?:-{1,3}|—) ?([12]?\d{3})(?![\wА-ЯЁа-яё]|-[^ех]|-[ех][\wА-ЯЁа-яё])/g,
+-			function ( s, m1, m2, m3, m4 ) {
+-				// filter Boeing airplanes; see the list at https://pastebin.com/rgJv6R4z (no new items expected)
+-				if (
+-					( m3[ 0 ] === '7' && m3[ 2 ] === '7' ) &&
+-					(
+-						m1 ||
+-						m4 < m3 && ( m4[ 2 ] === '0' || m4 === '138' || m4 === '227' ) ||
+-						m3 === '707' && m4 === '820' ||
+-						m3 === '737' && m4 === '800' ||
+-						m3 === '737' && m4 === '900'
+-					)
+-				) {
+-					return s;
+-				}
+-				return ( m1 || '' ) + m2 + m3 + '—' + m4;
+-			}
+-		);
+-
+ 		// Диапазоны годов и веков
+ 		r( /([12]?\d{3}) ?(гг?\.)/g, '$1' + u + '$2' );
+ 		r( /(\(|\s)([IVX]{1,5})[\u00A0 ]?(-{1,3}|—) ?([IVX]{1,5})(?![\w\-])/g, '$1$2—$4' );
+@@ -364,13 +183,6 @@ window.Wikify = function ( inputOrText ) {
+ 		r( /(\s\d+)\.(\d+[\u00A0 ]*[%‰°×])/gi, '$1,$2' ); // замена точки в числах на запятую
+ 		r( /(\d) (?=\d{3}\b)/g, '$1' + u ); // 1 000 000
+ 
+-		// Плагины
+-		for ( i in window.wfPlugins ) {
+-			if ( window.wfPlugins.hasOwnProperty( i ) ) {
+-				window.wfPlugins[i]( txt, r );
+-			}
+-		}
+-
+ 		// "" → «»
+ 		for ( i = 1; i <= 2; i++ ) {
+ 			r( /([\s\x02!|#'"\/([{;+\-])"([^"]*)([^\s"([{|])"([^a-zа-яё])/ig, '$1«$2$3»$4' ); // "
+@@ -395,166 +207,9 @@ window.Wikify = function ( inputOrText ) {
+     // Правило 3: если закрывающие кавычки вне выделения
+     r( /('''''|'''|'')([«„])([^'\n]*?)\1([»“])/g, '$1$2$3$4$1' );
+ 
+-		// Возврат шаблонов
+-		function unhide( s, num ) {
+-			return hidden[ num - 1 ];
+-		}
+-		while ( txt.match( /\x01\d+\x02/ ) ) {
+-			r( /\x01(\d+)\x02/g, unhide );
+-		}
+-
+ 		txt = txt.substr( 1, txt.length - 2 ); // compensation for "txt = '\n' + txt + '\n';"
+ 	}
+ 
+-	function processAllText() {
+-		txt = $input ? $input.textSelection( 'getContents' ) : text;
+-		processText();
+-		if ( $input ) {
+-			r( /^[\n\r]+/, '' );
+-			
+-			$input.textSelection( 'setContents', txt );
+-			if ( caretPosition ) {
+-				$input.textSelection( 'setSelection', {
+-					start: caretPosition[0] > txt.length ? txt.length : caretPosition[0]
+-				} );
+-			}
+-		} else {
+-			text = txt;
+-		}
+-		if (
+-			window.auto_comment &&
+-			window.insertSummary &&
+-			!document.editform.wpSection.value
+-		) {
+-			window.insertSummary( strings.summary );
+-		}
+-	}
+-
+-	// ГЛАВНЫЙ КОД
+-	
+-	// Check what's in the first parameter
+-	var text;
+-	var isInput;
+-	var $input;
+-	if ( typeof inputOrText === 'string' ) {
+-		text = inputOrText;
+-	} else {
+-		isInput = (
+-			inputOrText &&
+-			(
+-				( inputOrText.nodeType && inputOrText.value !== undefined ) || // node
+-				( inputOrText.prop && inputOrText.prop( 'nodeType' ) ) // объект jQuery
+-			)
+-		);
+-		$input = $( isInput ? inputOrText : '#wpTextbox1' );
+-	}
+-
+-	var txt = '';
+-	var hidden = [];
+-	var winScroll = document.documentElement.scrollTop;
+-	var caretPosition;
+-	if ( $input ) {
+-		$input.focus();
+-		
+-		caretPosition = $input.textSelection( 'getCaretPosition', { startAndEnd: true } );
+-		if ( caretPosition ) {
+-			var $CodeMirrorVscrollbar = $( '.CodeMirror-vscrollbar' );
+-			var textScroll = ( $CodeMirrorVscrollbar.length ? $CodeMirrorVscrollbar : $input )
+-				.scrollTop();
+-				
+-			// Чтобы создать уведомление, изменился ли текст после нажатия кнопки ВФ,
+-			// 1) нужно проанализировать текст до и после. Получаем текст до обработки:
+-			var textBeforeWf = $input.textSelection( 'getContents' );
+-				
+-			if ( caretPosition[0] === caretPosition[1] ) {
+-				processAllText();
+-			} else {
+-				txt = $input.textSelection( 'getSelection' );
+-				processText();
+-				// replaceSelection doesn't work with MediaWiki 1.30 in case this gadget is loaded
+-				// from other wiki
+-				$input.textSelection( 'encapsulateSelection', {
+-					replace: true,
+-					peri: txt
+-				} );
+-				// In CodeMirror, the selection isn't preserved, so we do it explicitly
+-				$input.textSelection( 'setSelection', {
+-					start: caretPosition[0],
+-					end: caretPosition[0] + txt.length
+-				} );
+-			}
+-			
+-			// 2) получить текст после нажатия кнопки ВФ:
+-			var textAfterWf = $input.textSelection( 'getContents' );
+-			
+-			// 3) сравнить до и после. Уведомить
+-			if ( textBeforeWf === textAfterWf ) {
+-				mw.notify( 'Викификатор не внёс изменений.', {
+-					type: 'warn', // жёлтое
+-					tag: 'wf-no-change-notification' // Тег для отключения уведомления в CSS при желании. Примеры: пользователь [[Служебная:Постоянная ссылка/150682820]], гаджет [[Служебная:Постоянная ссылка/150970182#L-111]]
+-				} );
+-			} else {
+-				mw.notify( 'Викификатор внёс изменения.', {
+-					type: 'success', // зелёное
+-					tag: 'wf-some-change-notification' // Тег для отключения уведомления в CSS при желании. Примеры: пользователь [[Служебная:Постоянная ссылка/150682820]], гаджет [[Служебная:Постоянная ссылка/150970182#L-111]]
+-				} );
+-			}
+-			// Конец кода для уведомлений
+-			
+-			( $CodeMirrorVscrollbar.length ? $CodeMirrorVscrollbar : $input )
+-				.scrollTop( textScroll );
+-		// If something went wrong
+-		} else if ( confirm( strings.fullText ) ) {
+-			processAllText();
+-		}
+-	} else {
+-		processAllText();
+-		return text;
+-	}
+-
+-	// scroll back, for 2017 wikitext editor, IE, Opera
+-	document.documentElement.scrollTop = winScroll;
+-};
+-
+-// Кнопка на панели инструментов
+-function registerWikificatorTool() {
+-	registerTool( {
+-		name: 'wikificator',
+-		position: 100,
+-		title: strings.name,
+-		label: strings.tooltip,
+-		callback: Wikify,
+-		classic: {
+-			icon: '//upload.wikimedia.org/wikipedia/commons/4/41/Wikificator_VE_icon.svg',
+-		},
+-		visual: {
+-			icon: '//upload.wikimedia.org/wikipedia/commons/4/41/Wikificator_VE_icon.svg',
+-			modes: [ 'source' ],
+-			addRightAway: true,
+-		},
+-	} );
++	processText();
++	return txt;
+ }
+-
+-if ( mw.config.get( 'wgServerName' ) === 'ru.wikipedia.org' ) {
+-	registerWikificatorTool();
+-} else {
+-	$.when(
+-		mw.loader.using( [ 'mediawiki.util', 'user.options' ] ),
+-		$.getScript( 'https://ru.wikipedia.org/w/index.php?title=MediaWiki:Gadget-registerTool.js&action=raw&ctype=text/javascript' )
+-	).done( registerWikificatorTool );
+-}
+-
+-// Ctrl+Alt+W на Windows, Ctrl+Shift+W на Mac'е
+-$( '#editform' ).on( 'keydown', function ( e ) {
+-	if (
+-		e.ctrlKey &&
+-		!e.metaKey && // не клавиша ⊞ и не ⌘
+-		(clientProfile.platform === 'mac' ? e.shiftKey && !e.altKey : !e.shiftKey && e.altKey) &&
+-		e.keyCode === 87 // клавиша W
+-	) {
+-		Wikify();
+-	}
+-} );
+-
+-}() );
+-// </nowiki>
+-- 
+2.47.3
+

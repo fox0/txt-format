@@ -15,7 +15,7 @@ export function processText(text: string): string {
     // python3 autoformat.py --pre |
     text = processTextPre(text);
     // js wikificator.js |
-    text = wiki.processText(text);
+    text = wiki.Wikify(text);
     // js node_modules/eyo/bin/cli.js --stdin |
     text = safeEyo.restore(text);
     // python3 autoformat.py --post
