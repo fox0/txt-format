@@ -3,5 +3,7 @@ src/
 node_modules/eyo-kernel/dictionary/
 node_modules/eyo-kernel/dist/bundle/
 node_modules/eyo-kernel/dist/bundle.*
+patches/
 .gitignore
+tsconfig.json
 **/*.ts
