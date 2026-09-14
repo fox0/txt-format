@@ -4,7 +4,7 @@ src/
 node_modules/eyo-kernel/dictionary/
 node_modules/eyo-kernel/dist/bundle/
 node_modules/eyo-kernel/dist/bundle.*
-#node_modules/eyo-kernel/dist/notSafeDictionary.js
+node_modules/eyo-kernel/dist/notSafeDictionary.js
 patches/
 .gitignore
 tsconfig.json
