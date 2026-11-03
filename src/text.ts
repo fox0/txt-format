@@ -294,6 +294,7 @@ function processTextPost(text: string): string {
     r(/\n<i>-\s+/gu, '\n<i>—\xa0');
 
     //.кавычка -> 
+    r(/\.»/gu, '».');
 
     return text.trim();
 }

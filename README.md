@@ -3,9 +3,9 @@
 ```bash
 git clone https://github.com/fox0/txt-format
 npm install
-npm run compile
-# "vitest": "^3.2.7"
-npm run test
 npx @vscode/vsce package
-code --install-extension txt-format-*.vsix
+code --install-extension *.vsix
+
+#npm install vitest@3.2.7 --dev
+npm run test
 ```
